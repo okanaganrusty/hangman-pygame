@@ -11,6 +11,7 @@ import settings
 class App:
   current_index = 0
   keys_collected = set()
+  invalid_key_count = 0
   guess_word = "cat"
 
   def __init__(self):
@@ -20,12 +21,16 @@ class App:
     self.font = ft.SysFont("Verdana", settings.FONT_SIZE)
     self.dt = 0.0
 
+    # for item in pathlib.Path(settings.SPRITE_DIR_PATH).glob("*.png"):
+    #   if item.is_file():
+    #     self.sprite_paths.append(item)
+
     self.sprite_paths = [
         item for item in pathlib.Path(settings.SPRITE_DIR_PATH).glob("*.png")
         if item.is_file()
     ]
 
-    # print(self.sprite_paths)
+    self.guessed_word_length = len(self.guess_word)
 
   def loser(self):
     return self.current_index == len(self.sprite_paths) - 1
@@ -43,6 +48,13 @@ class App:
 
     self.draw_message(f"{self.clock.get_fps() :.0f} FPS", "blue", x, y)
 
+  def game_was_won(self):
+    return len(self.keys_collected & set(self.guess_word)) == len(
+        set(self.guess_word))
+
+  def is_valid_letter(self, letter):
+    return list(self.guess_word).count(letter) > 0
+
   def draw_keys_pressed(self):
     x, y = 0, 20
     message = "Guessed letters: " + "".join(self.keys_collected)
@@ -51,12 +63,25 @@ class App:
   def draw_masked_word(self):
     x, y = 100, 200
     message = "Solve word: "
+
+    for i in range(self.guessed_word_length):
+      if self.guess_word[i] in self.keys_collected:
+        message += self.guess_word[i] + " "
+      else:
+        message += "? "
+
     self.draw_message(message, "blue", x, y)
 
   def draw_actual_word(self):
     x, y = 100, 200
     message = f"The word was: {self.guess_word}"
     self.draw_message(message, "blue", x, y)
+
+  def draw_game_lost(self):
+    return pg.image.load("images/oh-no.png").convert_alpha()
+
+  def draw_game_won(self):
+    return pg.image.load("images/oh-yeah.jpg").convert_alpha()
 
   def display_current_sprite(self, current_index):
     return pg.image.load(self.sprite_paths[current_index]).convert_alpha()
@@ -69,6 +94,7 @@ class App:
     self.draw_fps()
 
     if self.loser():
+      self.screen.blit(self.draw_game_lost(), (0, 0))
       self.draw_actual_word()
     else:
       self.draw_keys_pressed()
@@ -81,15 +107,22 @@ class App:
         sys.exit()
       elif e.type == pg.KEYDOWN:
         self.keys_collected.add(e.unicode)
-      elif e.type == pg.MOUSEBUTTONDOWN:
-        if not self.loser():
-          self.current_index = self.current_index + 1
+        if not self.is_valid_letter(e.unicode):
+          self.current_index += 1
+      # elif e.type == pg.MOUSEBUTTONDOWN:
+      #   if not self.loser():
+      #     self.current_index = self.current_index + 1
 
   def run(self):
     while True:
-      self.check_events()
-      self.update()
-      self.draw()
+      if self.game_was_won():
+        # Do something to indicate to the user that they won
+        self.screen.blit(self.draw_game_won(), (0, 0))
+        self.update()
+      else:
+        self.check_events()
+        self.update()
+        self.draw()
 
 
 if __name__ == "__main__":
