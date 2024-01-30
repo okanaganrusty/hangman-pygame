@@ -12,7 +12,56 @@ class App:
   current_index = 0
   keys_collected = set()
   invalid_key_count = 0
-  guess_word = "cat"
+  random_words = [
+      "apple",
+      "banana",
+      "cherry",
+      "date",
+      "elderberry",
+      "fig",
+      "grape",
+      "honeydew",
+      "kiwi",
+      "lemon",
+      "mango",
+      "nectarine",
+      "orange",
+      "peach",
+      "quince",
+      "raspberry",
+      "strawberry",
+      "tangerine",
+      "ugli",
+      "vanilla",
+      "watermelon",
+      "xigua",
+      "yellow",
+      "zucchini",
+      "almond",
+      "blackberry",
+      "cantaloupe",
+      "date",
+      "elderberry",
+      "fig",
+      "grape",
+      "honeydew",
+      "kiwi",
+      "lemon",
+      "mango",
+      "nectarine",
+      "orange",
+      "peach",
+      "quince",
+      "raspberry",
+      "strawberry",
+      "tangerine",
+      "ugli",
+      "vanilla",
+      "watermelon",
+      "xigua",
+      "yellow",
+  ]
+  guess_word = random.choice(random_words)
 
   def __init__(self):
     pg.init()
